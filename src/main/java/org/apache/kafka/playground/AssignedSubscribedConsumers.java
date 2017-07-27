@@ -10,46 +10,38 @@ import org.apache.kafka.common.TopicPartition;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by ppatiern on 26/07/17.
  */
 public class AssignedSubscribedConsumers {
 
-    public static void main(String[] args) {
+    private volatile boolean consuming = true;
+    private ExecutorService executorService;
 
-        new AssignedSubscribedConsumers().run1();
-        //new AssignedSubscribedConsumers().run2();
+    public void start() {
+
+        this.executorService = Executors.newFixedThreadPool(2);
+        this.executorService.submit(new AssignedConsumer());
+        this.executorService.submit(new SubscribedConsumer());
     }
 
-    private void run1() {
+    public void stop() throws InterruptedException {
 
-        Thread t1 = new Thread(new AssignedConsumer());
-        t1.start();
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Thread t2 = new Thread(new SubscribedConsumer());
-        t2.start();
+        this.consuming = false;
+        this.executorService.awaitTermination(10000, TimeUnit.MILLISECONDS);
+        this.executorService.shutdownNow();
     }
 
-    private void run2() {
+    public static void main(String[] args) throws Exception {
 
-        Thread t2 = new Thread(new SubscribedConsumer());
-        t2.start();
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Thread t1 = new Thread(new AssignedConsumer());
-        t1.start();
+        AssignedSubscribedConsumers consumers = new AssignedSubscribedConsumers();
+        consumers.start();
+        System.in.read();
+        consumers.stop();
     }
 
     private class AssignedConsumer implements Runnable {
@@ -62,17 +54,26 @@ public class AssignedSubscribedConsumers {
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
 
-            KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
+            KafkaConsumer<String, String> consumer = null;
 
-            consumer.assign(Collections.singleton(new TopicPartition("test", 0)));
+            try {
+                consumer = new KafkaConsumer<>(props);
+                consumer.assign(Collections.singleton(new TopicPartition("test", 0)));
 
-            while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(100);
-                for (ConsumerRecord<String, String> record : records) {
-                    System.out.println("AssignedConsumer: record value = " + record.value() +
-                            " on topic = " + record.topic() +
-                            " partition = " + record.partition());
+                while (consuming) {
+                    ConsumerRecords<String, String> records = consumer.poll(100);
+                    for (ConsumerRecord<String, String> record : records) {
+                        System.out.println("AssignedConsumer: record value = " + record.value() +
+                                " on topic = " + record.topic() +
+                                " partition = " + record.partition());
+                    }
                 }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (consumer != null)
+                    consumer.close();
             }
         }
     }
@@ -88,38 +89,47 @@ public class AssignedSubscribedConsumers {
             props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
             props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
 
-            KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+            KafkaConsumer<String, String> consumer = null;
+            try {
 
-            consumer.subscribe(Collections.singleton("test"), new ConsumerRebalanceListener() {
+                consumer = new KafkaConsumer<>(props);
+                consumer.subscribe(Collections.singleton("test"), new ConsumerRebalanceListener() {
 
-                @Override
-                public void onPartitionsRevoked(Collection<TopicPartition> collection) {
-                    if (collection.size() > 0) {
-                        System.out.println("Revoked partitions ...");
-                        for (TopicPartition topicPartition : collection) {
-                            System.out.println("topic=" + topicPartition.topic() + " partition=" + topicPartition.partition());
+                    @Override
+                    public void onPartitionsRevoked(Collection<TopicPartition> collection) {
+                        if (collection.size() > 0) {
+                            System.out.println("Revoked partitions ...");
+                            for (TopicPartition topicPartition : collection) {
+                                System.out.println("topic=" + topicPartition.topic() + " partition=" + topicPartition.partition());
+                            }
                         }
+                    }
+
+                    @Override
+                    public void onPartitionsAssigned(Collection<TopicPartition> collection) {
+                        if (collection.size() > 0) {
+                            System.out.println("Assigned partitions ...");
+                            for (TopicPartition topicPartition : collection) {
+                                System.out.println("topic=" + topicPartition.topic() + " partition=" + topicPartition.partition());
+                            }
+                        }
+                    }
+                });
+
+                while (consuming) {
+                    ConsumerRecords<String, String> records = consumer.poll(100);
+                    for (ConsumerRecord<String, String> record : records) {
+                        System.out.println("SubscribedConsumer: record value = " + record.value() +
+                                " on topic = " + record.topic() +
+                                " partition = " + record.partition());
                     }
                 }
 
-                @Override
-                public void onPartitionsAssigned(Collection<TopicPartition> collection) {
-                    if (collection.size() > 0) {
-                        System.out.println("Assigned partitions ...");
-                        for (TopicPartition topicPartition : collection) {
-                            System.out.println("topic=" + topicPartition.topic() + " partition=" + topicPartition.partition());
-                        }
-                    }
-                }
-            });
-
-            while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(100);
-                for (ConsumerRecord<String, String> record : records) {
-                    System.out.println("SubscribedConsumer: record value = " + record.value() +
-                            " on topic = " + record.topic() +
-                            " partition = " + record.partition());
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (consumer != null)
+                    consumer.close();
             }
         }
     }
