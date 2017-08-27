@@ -4,6 +4,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.errors.TopicExistsException;
 
 import java.util.Collections;
@@ -23,9 +24,12 @@ public class CreateTopic {
 
         try {
             createTopicsResult.all().get();
+        // real failure cause is wrapped inside the raised ExecutionException
         } catch (ExecutionException e) {
             if (e.getCause() instanceof TopicExistsException) {
-                System.out.println("Topic already exists");
+                System.err.println("Topic already exists !!");
+            } else if (e.getCause() instanceof TimeoutException) {
+                System.err.println("Timeout !!");
             }
             e.printStackTrace();
         } finally {
