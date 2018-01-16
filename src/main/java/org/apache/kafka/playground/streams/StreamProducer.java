@@ -17,6 +17,7 @@
 
 package org.apache.kafka.playground.streams;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class StreamProducer<K, V> {
     private KafkaProducer<K, V> producer;
 
     private Function<Void, ProducerRecord<K, V>> generator;
+    private Callback callback;
     private long delay;
     private ExecutorService executorService;
 
@@ -70,13 +72,15 @@ public class StreamProducer<K, V> {
      * Start the stream producer on a different thread
      *
      * @param generator function for generating records to send
+     * @param callback  callback called when the message is acked
      */
-    public void start(Function<Void, ProducerRecord<K, V>> generator) {
+    public void start(Function<Void, ProducerRecord<K, V>> generator, Callback callback) {
 
         Objects.requireNonNull(generator);
 
         log.info("Starting the producer ...");
         this.generator = generator;
+        this.callback = callback;
         this.executorService.execute(() -> {
 
             log.info("... started");
@@ -84,7 +88,7 @@ public class StreamProducer<K, V> {
                 while (running.get()) {
 
                     ProducerRecord<K, V> record = generator.apply(null);
-                    producer.send(record);
+                    producer.send(record, this.callback);
                     log.info("Sent record " + record);
                     Thread.sleep(delay);
                 }
@@ -94,6 +98,15 @@ public class StreamProducer<K, V> {
             }
 
         });
+    }
+
+    /**
+     * Start the stream producer on a different thread
+     *
+     * @param generator function for generating records to send
+     */
+    public void start(Function<Void, ProducerRecord<K, V>> generator) {
+        this.start(generator, null);
     }
 
     /**
