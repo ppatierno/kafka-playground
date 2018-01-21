@@ -26,14 +26,18 @@ public class HelloProcessor implements Processor<String, String> {
 
     private static final Logger log = LoggerFactory.getLogger(HelloProcessor.class);
 
+    private ProcessorContext context;
+
     @Override
     public void init(ProcessorContext processorContext) {
         log.info("init");
+        this.context = processorContext;
     }
 
     @Override
     public void process(String key, String value) {
         log.info("process");
+        this.context.forward(key, String.format("Hello %s !", value));
     }
 
     @Override
