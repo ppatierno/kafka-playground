@@ -63,8 +63,8 @@ public class StreamProducerConsumerApp {
 
     private void run() {
 
-        String consumerTopic = "test";
-        String producerTopic = "test";
+        String consumerTopic = System.getenv("STREAM_CONSUMER_TOPIC");
+        String producerTopic = System.getenv("STREAM_PRODUCER_TOPIC");
 
         Properties consumerProps = new Properties();
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
