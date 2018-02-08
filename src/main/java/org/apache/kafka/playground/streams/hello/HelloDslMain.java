@@ -46,6 +46,14 @@ public class HelloDslMain {
         StreamsConfig config = new StreamsConfig(props);
 
         KafkaStreams streams = new KafkaStreams(builder.build(), config);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                streams.close();
+            }
+        });
+
         streams.start();
     }
 }

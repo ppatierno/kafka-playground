@@ -54,6 +54,14 @@ public class HelloMain {
         StreamsConfig config = new StreamsConfig(props);
 
         KafkaStreams streams = new KafkaStreams(topology, config);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                streams.close();
+            }
+        });
+
         streams.start();
     }
 }
