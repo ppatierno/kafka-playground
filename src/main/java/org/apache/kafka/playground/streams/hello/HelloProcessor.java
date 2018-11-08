@@ -41,11 +41,6 @@ public class HelloProcessor implements Processor<String, String> {
     }
 
     @Override
-    public void punctuate(long timestamp) {
-        // this method is deprecated and should not be used anymore
-    }
-
-    @Override
     public void close() {
         log.info("close");
     }
