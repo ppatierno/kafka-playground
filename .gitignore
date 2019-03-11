@@ -11,3 +11,8 @@
 # IntelliJ IDEA specific
 .idea/
 *.iml
+
+# VSCode stuff
+.vscode/
+.history/
+**/.factorypath

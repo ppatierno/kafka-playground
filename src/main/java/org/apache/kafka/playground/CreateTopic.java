@@ -49,6 +49,7 @@ public class CreateTopic {
         AdminClient adminClient = AdminClient.create(props);
 
         NewTopic topic = new NewTopic("my_topic", 2, (short)1);
+        topic.configs(Collections.singletonMap("segment.bytes", "1073741824"));
         CreateTopicsResult createTopicsResult = adminClient.createTopics(Collections.singleton(topic));
 
         try {
