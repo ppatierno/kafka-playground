@@ -15,7 +15,7 @@
  *
  */
 
-package org.apache.kafka.playground;
+package org.apache.kafka.playground.admin;
 
 import io.debezium.kafka.KafkaCluster;
 import io.debezium.util.Testing;
