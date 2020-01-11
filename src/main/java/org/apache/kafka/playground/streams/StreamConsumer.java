@@ -17,7 +17,6 @@
 
 package org.apache.kafka.playground.streams;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
@@ -62,7 +61,7 @@ public class StreamConsumer<K, V> {
         this.props = props;
         this.executorService = Executors.newSingleThreadExecutor();
 
-        this.consumer = new KafkaConsumer<>(props);
+        this.consumer = new KafkaConsumer<>(this.props);
     }
 
     /**

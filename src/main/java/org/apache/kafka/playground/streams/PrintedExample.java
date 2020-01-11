@@ -27,7 +27,7 @@ public class PrintedExample {
 
         uppers.to("upper", Produced.with(Serdes.String(), Serdes.String()));
 
-        Printed sysout = Printed.toSysOut().withLabel("stdout");
+        Printed<String, String> sysout = Printed.<String, String>toSysOut().withLabel("stdout");
         uppers.print(sysout);
 
         Topology topology = builder.build();
@@ -39,7 +39,15 @@ public class PrintedExample {
         props.put(StreamsConfig.CLIENT_ID_CONFIG, PrintedExample.class.getSimpleName().replace("$", ""));
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
 
-        KafkaStreams ks = new KafkaStreams(topology, props);
-        ks.start();
+        KafkaStreams streams = new KafkaStreams(topology, props);
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                streams.close();
+            }
+        });
+
+        streams.start();
     }
 }

@@ -21,14 +21,17 @@ import io.debezium.kafka.KafkaCluster;
 import io.debezium.util.Testing;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.AlterConfigOp;
 import org.apache.kafka.clients.admin.AlterConfigsResult;
 import org.apache.kafka.clients.admin.Config;
 import org.apache.kafka.clients.admin.ConfigEntry;
 import org.apache.kafka.clients.admin.DescribeConfigsResult;
+import org.apache.kafka.clients.admin.AlterConfigOp.OpType;
 import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.config.TopicConfig;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -77,10 +80,10 @@ public class AlterTopicConfigs {
 
         // create a new entry for updating the retention.ms value on the same topic
         retentionEntry = new ConfigEntry(TopicConfig.RETENTION_MS_CONFIG, "51000");
-        Map<ConfigResource, Config> updateConfig = new HashMap<ConfigResource, Config>();
-        updateConfig.put(resource, new Config(Collections.singleton(retentionEntry)));
+        Map<ConfigResource, Collection<AlterConfigOp>> updateConfig = new HashMap<ConfigResource, Collection<AlterConfigOp>>();
+        updateConfig.put(resource, Collections.singleton(new AlterConfigOp(retentionEntry, OpType.SET)));
 
-        AlterConfigsResult alterConfigsResult = adminClient.alterConfigs(updateConfig);
+        AlterConfigsResult alterConfigsResult = adminClient.incrementalAlterConfigs(updateConfig);
         alterConfigsResult.all();
 
         describeConfigsResult  = adminClient.describeConfigs(Collections.singleton(resource));

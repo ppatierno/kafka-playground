@@ -65,7 +65,7 @@ public class StreamProducer<K, V> {
         this.delay = delay;
         this.executorService = Executors.newSingleThreadExecutor();
 
-        this.producer = new KafkaProducer<>(props);
+        this.producer = new KafkaProducer<>(this.props);
     }
 
     /**
@@ -87,7 +87,7 @@ public class StreamProducer<K, V> {
             try {
                 while (running.get()) {
 
-                    ProducerRecord<K, V> record = generator.apply(null);
+                    ProducerRecord<K, V> record = this.generator.apply(null);
                     producer.send(record, this.callback);
                     log.info("Sent record " + record);
                     Thread.sleep(delay);

@@ -61,7 +61,6 @@ public class ProduceNotExistingTopic {
             Future<RecordMetadata> f = producer.send(new ProducerRecord<>("not_existing_topic", "Test"), new Callback() {
                 @Override
                 public void onCompletion(RecordMetadata metadata, Exception exception) {
-
                     System.out.println(exception);
                 }
             });
@@ -72,5 +71,10 @@ public class ProduceNotExistingTopic {
         }
 
         Thread.sleep(10000000);
+
+        producer.close();
+
+        kafkaCluster.shutdown();
+        dataDir.delete();
     }
 }
