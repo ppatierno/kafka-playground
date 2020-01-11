@@ -25,6 +25,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,7 +83,7 @@ public class MaxConnectionsPerIP {
 
             consumer.subscribe(Collections.singleton("test"));
             while (running.get()) {
-                ConsumerRecords<String, String> records = consumer.poll(100);
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 System.out.println("records = " + records.count());
             }
 

@@ -24,6 +24,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -81,7 +82,7 @@ public class StreamConsumer<K, V> {
             try {
                 while (running.get()) {
 
-                    ConsumerRecords<K, V> records = consumer.poll(100);
+                    ConsumerRecords<K, V> records = consumer.poll(Duration.ofMillis(100));
                     handler.accept(records);
                 }
             } catch (WakeupException we) {

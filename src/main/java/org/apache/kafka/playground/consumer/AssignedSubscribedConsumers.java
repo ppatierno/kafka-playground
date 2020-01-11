@@ -27,6 +27,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
@@ -94,7 +95,7 @@ public class AssignedSubscribedConsumers {
                 consumer.assign(Collections.singleton(new TopicPartition("test", 0)));
 
                 while (consuming.get()) {
-                    ConsumerRecords<String, String> records = consumer.poll(100);
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
                         System.out.println("AssignedConsumer: record value = " + record.value() +
                                 " on topic = " + record.topic() +
@@ -150,7 +151,7 @@ public class AssignedSubscribedConsumers {
                 });
 
                 while (consuming.get()) {
-                    ConsumerRecords<String, String> records = consumer.poll(100);
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                     for (ConsumerRecord<String, String> record : records) {
                         System.out.println("SubscribedConsumer: record value = " + record.value() +
                                 " on topic = " + record.topic() +

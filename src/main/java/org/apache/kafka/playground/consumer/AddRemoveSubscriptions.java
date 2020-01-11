@@ -29,6 +29,7 @@ import org.apache.kafka.common.errors.WakeupException;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -90,7 +91,7 @@ public class AddRemoveSubscriptions implements ConsumerRebalanceListener {
             consumer.subscribe(Collections.singleton("topics"), this);
             while (running.get()) {
 
-                ConsumerRecords<String, String> records = consumer.poll(100);
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
                 for (ConsumerRecord<String, String> record : records) {
                     System.out.println("Consumer: record value = " + record.value() +
                             " on topic = " + record.topic() +

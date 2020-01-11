@@ -51,9 +51,8 @@ public class HelloMain {
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
-        StreamsConfig config = new StreamsConfig(props);
 
-        KafkaStreams streams = new KafkaStreams(topology, config);
+        KafkaStreams streams = new KafkaStreams(topology, props);
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
