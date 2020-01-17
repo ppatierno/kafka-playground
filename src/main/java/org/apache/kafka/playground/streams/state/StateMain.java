@@ -23,16 +23,15 @@ public class StateMain {
 
         StreamsBuilder builder = new StreamsBuilder();
 
-        KStream<String, Integer> source = builder.stream("source-topic",
-                Consumed.with(Serdes.String(), Serdes.Integer()));
-
         KeyValueBytesStoreSupplier supplier =  Stores.inMemoryKeyValueStore("accumulatorStore");
         StoreBuilder<KeyValueStore<String, Integer>> storeBuilder = Stores.keyValueStoreBuilder(supplier, Serdes.String(), Serdes.Integer());
         builder.addStateStore(storeBuilder);
 
-        KStream<String, Integer> transformed = source.transformValues(() -> new AccumulatorTransformer(), "accumulatorStore");
+        KStream<String, Integer> source = builder.stream("source-topic",
+                Consumed.with(Serdes.String(), Serdes.Integer()));
 
-        transformed.to("sink-topic", Produced.with(Serdes.String(), Serdes.Integer()));
+        source.transformValues(() -> new AccumulatorTransformer(), "accumulatorStore")
+                .to("sink-topic", Produced.with(Serdes.String(), Serdes.Integer()));
 
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "state-stream-id");
