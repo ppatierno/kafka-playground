@@ -10,11 +10,12 @@ import org.apache.kafka.streams.state.KeyValueStore;
 public class AccumulatorTransformer implements ValueTransformerWithKey<String, Integer, Integer> {
 
     private KeyValueStore<String, Integer> stateStore;
+    private ProcessorContext context;
 
     @Override
     public void init(ProcessorContext context) {
-        this.stateStore = (KeyValueStore) context.getStateStore("accumulatorStore");
-
+        this.context = context;
+        this.stateStore = (KeyValueStore) this.context.getStateStore("accumulatorStore");
     }
 
     @Override
@@ -30,8 +31,7 @@ public class AccumulatorTransformer implements ValueTransformerWithKey<String, I
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-
+        // no operation
     }
 
    
