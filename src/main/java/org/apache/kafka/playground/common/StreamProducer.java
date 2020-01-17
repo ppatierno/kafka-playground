@@ -15,7 +15,7 @@
  *
  */
 
-package org.apache.kafka.playground.streams;
+package org.apache.kafka.playground.common;
 
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;

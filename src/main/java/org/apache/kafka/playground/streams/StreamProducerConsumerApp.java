@@ -23,6 +23,8 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.playground.common.StreamConsumer;
+import org.apache.kafka.playground.common.StreamProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
