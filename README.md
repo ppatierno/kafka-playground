@@ -9,4 +9,5 @@ The common partition (manually and automatically assigned) is available to both 
 * _MaxConnectionsPerIP_ : it shows how the "max.connections.per.ip" broker property influences a single client (consumer/producer) as well;
 * _AlterTopicPartitions_: it shows how it's possible to increase the number of partitions for a topic;
 * _ProducerNotExistingTopic_: it shows hot to catch error about sending to a non existing topic using interceptor;
-* _ConsumerGroupOnTopics_ : it shows the difference between default RangeAssignor and the RoundRobinAssignor which allows to rebalance partitions belonging different topics across different consumers in the same consumer group; 
+* _ConsumerGroupOnTopics_ : it shows the difference between default RangeAssignor and the RoundRobinAssignor which allows to rebalance partitions belonging different topics across different consumers in the same consumer group;
+* _DescribeQuorumMetadata_: it shows how discribing the cluster in terms of brokers differs from the outcome with the the quorum info in terms of voters and observers;
