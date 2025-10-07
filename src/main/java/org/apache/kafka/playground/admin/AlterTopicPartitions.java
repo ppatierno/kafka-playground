@@ -58,7 +58,7 @@ public class AlterTopicPartitions {
 
         // get information about the topic, should have 1 partition
         DescribeTopicsResult describeTopicsResult = adminClient.describeTopics(Collections.singleton("my_topic"));
-        TopicDescription topicDescription = describeTopicsResult.values().get("my_topic").get();
+        TopicDescription topicDescription = describeTopicsResult.topicNameValues().get("my_topic").get();
         System.out.println("partitions = " + topicDescription.partitions().size());
 
         // increase the number of partitions by 1 (up to 2 partitions)
@@ -71,7 +71,7 @@ public class AlterTopicPartitions {
 
         // get information about the topic, should have 2 partition now
         describeTopicsResult = adminClient.describeTopics(Collections.singleton("my_topic"));
-        topicDescription = describeTopicsResult.values().get("my_topic").get();
+        topicDescription = describeTopicsResult.topicNameValues().get("my_topic").get();
         System.out.println("partitions = " + topicDescription.partitions().size());
 
         adminClient.close();

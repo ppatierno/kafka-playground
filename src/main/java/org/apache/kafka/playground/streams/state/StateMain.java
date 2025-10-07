@@ -30,7 +30,7 @@ public class StateMain {
         KStream<String, Integer> source = builder.stream("source-topic",
                 Consumed.with(Serdes.String(), Serdes.Integer()));
 
-        source.transformValues(() -> new AccumulatorTransformer(), "accumulatorStore")
+        source.processValues(() -> new AccumulatorTransformer(), "accumulatorStore")
                 .to("sink-topic", Produced.with(Serdes.String(), Serdes.Integer()));
 
         Properties props = new Properties();

@@ -1,32 +1,33 @@
 package org.apache.kafka.playground.streams.state;
 
-import org.apache.kafka.streams.kstream.ValueTransformerWithKey;
-import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.api.FixedKeyProcessor;
+import org.apache.kafka.streams.processor.api.FixedKeyProcessorContext;
+import org.apache.kafka.streams.processor.api.FixedKeyRecord;
 import org.apache.kafka.streams.state.KeyValueStore;
 
 /**
  * AccumulatorTransformer
  */
-public class AccumulatorTransformer implements ValueTransformerWithKey<String, Integer, Integer> {
+public class AccumulatorTransformer implements FixedKeyProcessor<String, Integer, Integer> {
 
     private KeyValueStore<String, Integer> stateStore;
-    private ProcessorContext context;
+    private FixedKeyProcessorContext<String, Integer> context;
 
     @Override
-    public void init(ProcessorContext context) {
+    public void init(FixedKeyProcessorContext<String, Integer> context) {
         this.context = context;
-        this.stateStore = (KeyValueStore) this.context.getStateStore("accumulatorStore");
+        this.stateStore = context.getStateStore("accumulatorStore");
     }
 
     @Override
-    public Integer transform(String readOnlyKey, Integer value) {
-        Integer accumulator = value;
-        Integer accumulatedSoFar = this.stateStore.get(readOnlyKey);
+    public void process(FixedKeyRecord<String, Integer> record) {
+        Integer accumulator = record.value();
+        Integer accumulatedSoFar = this.stateStore.get(record.key());
         if (accumulatedSoFar != null) {
             accumulator += accumulatedSoFar;
         }
-        this.stateStore.put(readOnlyKey, accumulator);
-        return accumulator;
+        this.stateStore.put(record.key(), accumulator);
+        this.context.forward(record.withValue(accumulator));
     }
 
     @Override
@@ -34,6 +35,6 @@ public class AccumulatorTransformer implements ValueTransformerWithKey<String, I
         // no operation
     }
 
-   
-    
+
+
 }

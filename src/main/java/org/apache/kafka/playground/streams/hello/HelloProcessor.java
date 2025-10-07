@@ -17,27 +17,28 @@
 
 package org.apache.kafka.playground.streams.hello;
 
-import org.apache.kafka.streams.processor.Processor;
-import org.apache.kafka.streams.processor.ProcessorContext;
+import org.apache.kafka.streams.processor.api.Processor;
+import org.apache.kafka.streams.processor.api.ProcessorContext;
+import org.apache.kafka.streams.processor.api.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HelloProcessor implements Processor<String, String> {
+public class HelloProcessor implements Processor<String, String, String, String> {
 
     private static final Logger log = LoggerFactory.getLogger(HelloProcessor.class);
 
-    private ProcessorContext context;
+    private ProcessorContext<String, String> context;
 
     @Override
-    public void init(ProcessorContext processorContext) {
+    public void init(ProcessorContext<String, String> context) {
         log.info("init");
-        this.context = processorContext;
+        this.context = context;
     }
 
     @Override
-    public void process(String key, String value) {
+    public void process(Record<String, String> record) {
         log.info("process");
-        this.context.forward(key, String.format("Hello %s !", value));
+        this.context.forward(new Record<>(record.key(), String.format("Hello %s !", record.value()), record.timestamp()));
     }
 
     @Override
